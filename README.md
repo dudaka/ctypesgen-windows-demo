@@ -45,9 +45,20 @@ winget install BrechtSanders.WinLibs.POSIX.UCRT
 ```
 
 Add MinGW to your PATH (restart your terminal after installation or run):
+
+**For PowerShell:**
+```powershell
+$env:PATH += ";C:\Users\$env:USERNAME\AppData\Local\Microsoft\WinGet\Packages\BrechtSanders.WinLibs.POSIX.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe\mingw64\bin"
+```
+
+**For Command Prompt:**
 ```cmd
-# Add this to your PATH environment variable:
-C:\Users\%USERNAME%\AppData\Local\Microsoft\WinGet\Packages\BrechtSanders.WinLibs.POSIX.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe\mingw64\bin
+set PATH=%PATH%;C:\Users\%USERNAME%\AppData\Local\Microsoft\WinGet\Packages\BrechtSanders.WinLibs.POSIX.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe\mingw64\bin
+```
+
+**Permanent installation (run as Administrator in PowerShell):**
+```powershell
+[Environment]::SetEnvironmentVariable("PATH", $env:PATH + ";C:\Users\$env:USERNAME\AppData\Local\Microsoft\WinGet\Packages\BrechtSanders.WinLibs.POSIX.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe\mingw64\bin", [EnvironmentVariableTarget]::Machine)
 ```
 
 #### 2. Compile the shared C library as a Windows DLL
@@ -75,6 +86,7 @@ Expected output:
 a 1
 b 2
 result 3
+DB_C_TYPE_STRING 1
 ```
 
 ### Option B: Manual Approach (Fallback)
