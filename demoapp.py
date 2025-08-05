@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+"""
+Trivial ctypesgen demo library consumer
+from http://code.google.com/p/ctypesgen
+
+ NOTE demolib.py needs to be generated via:
+
+    ../run.py -o pydemolib.py -l demolib demolib.h
+    ../run.py -o pydemolib.py -l demolib.so demolib.h
+
+
+"""
+
+import sys
+
+import pydemolib  # generated from demolib.h by ctypesgen
+
+
+def do_demo():
+    a = 1
+    b = 2
+    result = pydemolib.trivial_add(a, b)
+    print("a", a)
+    print("b", b)
+    print("result", result)
+    print("DB_C_TYPE_STRING", pydemolib.DB_C_TYPE_STRING)
+
+
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
+
+    do_demo()
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
