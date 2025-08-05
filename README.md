@@ -32,6 +32,52 @@ To verify the installation, run:
 ctypesgen --version
 ```
 
+## Setting up Visual C++ Compiler (cl.exe)
+
+Before compiling C code, you need to set up the Visual C++ compiler environment. The `cl.exe` compiler needs to be available in your PATH with the proper environment variables.
+
+### Option 1: Using Developer Command Prompt (Recommended)
+
+The easiest way is to use the **Developer Command Prompt** or **Developer PowerShell** that comes with Visual Studio:
+
+1. Search for "Developer Command Prompt" or "Developer PowerShell" in the Start menu
+2. Run all subsequent commands in this terminal
+
+### Option 2: Manual Setup in Regular Terminal
+
+If you prefer to use a regular Command Prompt or PowerShell, you need to run the Visual Studio environment setup script:
+
+**For Command Prompt:**
+```cmd
+"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+```
+
+**For PowerShell:**
+```powershell
+& "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+```
+
+**Alternative paths for different Visual Studio editions:**
+- **Visual Studio Build Tools**: `"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"`
+- **Visual Studio Professional**: `"C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvars64.bat"`
+- **Visual Studio Enterprise**: `"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"`
+
+### Verify cl.exe is available
+
+After setting up the environment, verify that the compiler is available:
+
+```cmd
+cl
+```
+
+You should see output like:
+```
+Microsoft (R) C/C++ Optimizing Compiler Version 19.xx.xxxxx for x64
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+usage: cl [ option... ] filename... [ /link linkoption... ]
+```
+
 ## Steps for Windows
 
 ### Option A: Automatic Generation (Recommended)
