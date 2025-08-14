@@ -16,19 +16,29 @@ Generate Python bindings for C libraries using ctypesgen on Windows with automat
    git clone https://github.com/dudaka/ctypesgen-windows-demo.git
    cd ctypesgen-windows-demo
    build.bat
+   
+   # Generate Python bindings and run demo
+   cd build
+   cmake --build . --target run_python_demo --config Release
    ```
 
-3. **Test the Result**
-   ```cmd
-   python demoapp.py
-   ```
+That's it! The build process automatically:
 
-That's it! The build script automatically:
 - Clones MinGW-w64 from GitHub
 - Clones ctypesgen from GitHub  
 - Builds the C library
-- Generates Python bindings
+- Generates Python bindings (`pydemolib.py`)
 - Runs the demo
+
+**Alternative: Run Python demo manually after build:**
+
+```cmd
+# After build.bat completes, you can also run:
+cd build
+cmake --build . --target python_bindings --config Release
+cd ..
+python demoapp.py
+```
 
 ## What This Demo Does
 
