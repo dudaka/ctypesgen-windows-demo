@@ -168,7 +168,7 @@ function(setup_ctypesgen_environment)
             "echo ctypesgen bin added to PATH: ${CTYPESGEN_INSTALL_DIR}/bin\n"
             "echo.\n"
             "echo Testing ctypesgen:\n"
-            "\"${Python3_EXECUTABLE}\" \"${CTYPESGEN_EXECUTABLE}\" --version\n"
+            "call \"${CTYPESGEN_EXECUTABLE}\" --version\n"
             "if errorlevel 1 (\n"
             "    echo ERROR: ctypesgen not working properly\n"
             ") else (\n"

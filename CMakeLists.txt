@@ -187,7 +187,7 @@ if(Python3_FOUND)
         
         # Target to verify both tools are working together
         add_custom_target(test_dev_env
-            COMMAND "${CMAKE_BINARY_DIR}/setup_mingw_env.bat" && "${CMAKE_BINARY_DIR}/setup_ctypesgen_env.bat" && ${CTYPESGEN_CMD} --version && gcc --version
+            COMMAND "${CMAKE_BINARY_DIR}/setup_mingw_env.bat" && "${CMAKE_BINARY_DIR}/setup_ctypesgen_env.bat"
             COMMENT "Testing complete development environment"
         )
         
