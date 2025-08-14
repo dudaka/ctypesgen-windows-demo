@@ -1,53 +1,56 @@
-Small Demonstration of Ctypesgen - Windows Version
-================================================
+Small Demonstration of Ctypesgen - Windows Version (Source-Built Tools)
+=======================================================================
 
 This little demonstration shows how bindings for a very simple C library 
 and associated header can be quickly generated using Ctypesgen and accessed 
-by a Python program on Windows.
+by a Python program on Windows. This enhanced version automatically builds 
+both MinGW-w64 and ctypesgen from their GitHub source repositories.
 
-## Quick Start (CMake with Auto MinGW Setup)
+## Quick Start (CMake with Auto Source Setup)
 
-For the fastest setup with automatic MinGW-w64 installation:
+For the fastest setup with automatic MinGW-w64 and ctypesgen source installation:
 
 ```cmd
-# Windows - Automatic MinGW setup and build
+# Windows - Automatic source-based setup and build
 build.bat
 
-# Or setup MinGW only
-setup_mingw.bat
+# Or setup tools only  
+setup_mingw.bat     # MinGW-w64 from source
+cmake --build build --target setup_ctypesgen_env  # ctypesgen from source
 
 # Linux/macOS  
 chmod +x build.sh
 ./build.sh
 ```
 
-The enhanced build script will automatically download and setup MinGW-w64 if needed!
+The enhanced build script will automatically clone and setup both MinGW-w64 and ctypesgen from their GitHub repositories!
 
 ## Prerequisites
 
 ### Basic Requirements
+
 - Python 3.x
 - CMake 3.22 or later
 - Microsoft Visual C++ compiler (comes with Visual Studio or Build Tools for Visual Studio)
 
-### For Automatic MinGW Setup (Recommended)
-- **Git** (for cloning MinGW-w64 source) - [Download here](https://git-scm.com/download/win)
-- **Internet connection** (for cloning MinGW-w64 repository)
+### For Automatic Source Setup (Recommended)
 
-### Manual MinGW Setup (Alternative)
+- **Git** (for cloning MinGW-w64 and ctypesgen source) - [Download here](https://git-scm.com/download/win)
+- **Internet connection** (for cloning both repositories)
+
+### Manual Setup (Alternative)
+
 - **MinGW-w64** (provides gcc for preprocessing) - Manual installation required
+- **ctypesgen** (install via pip or from source) - Manual installation required
 
-## Installing ctypesgen
+## Automatic Tool Installation
 
-Before running the demo, you need to install ctypesgen. You can install it using pip:
+This project now automatically installs both required tools from their GitHub sources:
 
-```cmd
-pip install ctypesgen
-```
+- **MinGW-w64**: Cloned from https://github.com/mingw-w64/mingw-w64 
+- **ctypesgen**: Cloned from https://github.com/ctypesgen/ctypesgen
 
-Alternatively, if you prefer to install from source or need the latest development version:
-
-```cmd
+No manual installation needed! The CMake build system handles everything.
 pip install git+https://github.com/ctypesgen/ctypesgen.git
 ```
 

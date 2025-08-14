@@ -65,8 +65,12 @@ __pycache__/
 *.pyd
 pydemolib.py
 
-# MinGW-w64 auto-clone and build files
+# MinGW-w64 and ctypesgen auto-clone and build files
 mingw-w64/
 mingw-w64-source/
+ctypesgen/
+ctypesgen-source/
 setup_mingw_env.bat
 setup_mingw_env.ps1
+setup_ctypesgen_env.bat
+setup_ctypesgen_env.ps1

@@ -5,8 +5,9 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 
 project(CtypesgenDemo VERSION 1.0.0 LANGUAGES C)
 
-# Options for MinGW setup
+# Options for MinGW and ctypesgen setup
 option(AUTO_SETUP_MINGW "Automatically setup MinGW-w64 for ctypesgen" ON)
+option(AUTO_SETUP_CTYPESGEN "Automatically setup ctypesgen from source" ON)
 option(USE_SYSTEM_MINGW "Use system MinGW if available" ON)
 
 # Setup MinGW-w64 if requested and on Windows
@@ -27,6 +28,28 @@ if(WIN32 AND AUTO_SETUP_MINGW)
         COMMENT "Testing MinGW installation"
         VERBATIM
     )
+endif()
+
+# Setup ctypesgen from source if requested
+if(AUTO_SETUP_CTYPESGEN)
+    message(STATUS "Setting up ctypesgen from source...")
+    include(DownloadCtypesgen)
+    
+    # Create a custom target to setup ctypesgen environment
+    if(CTYPESGEN_FOUND)
+        add_custom_target(setup_ctypesgen_env
+            COMMAND "${CMAKE_BINARY_DIR}/setup_ctypesgen_env.bat"
+            COMMENT "Setting up ctypesgen environment"
+            VERBATIM
+        )
+        
+        # Create a custom target to test ctypesgen installation
+        add_custom_target(test_ctypesgen
+            COMMAND "${CMAKE_BINARY_DIR}/setup_ctypesgen_env.bat"
+            COMMENT "Testing ctypesgen installation"
+            VERBATIM
+        )
+    endif()
 endif()
 
 # Set C standard
@@ -123,28 +146,73 @@ if(BUILD_TESTS)
     endif()
 endif()
 
-# Python integration target (optional)
+# Python integration target (using our source-built tools)
 find_package(Python3 COMPONENTS Interpreter)
 if(Python3_FOUND)
-    # Create enhanced Python bindings target that uses our MinGW setup
-    if(WIN32 AND AUTO_SETUP_MINGW AND MINGW_FOUND)
-        # Use MinGW environment for ctypesgen
+    # Determine which ctypesgen to use
+    set(CTYPESGEN_CMD "ctypesgen")
+    if(CTYPESGEN_FOUND AND CTYPESGEN_EXECUTABLE)
+        # Use our source-built ctypesgen
+        if(WIN32)
+            # For Windows, we need to handle batch files properly
+            get_filename_component(CTYPESGEN_EXT "${CTYPESGEN_EXECUTABLE}" EXT)
+            if(CTYPESGEN_EXT STREQUAL ".bat")
+                set(CTYPESGEN_CMD "\"${CTYPESGEN_EXECUTABLE}\"")
+            else()
+                set(CTYPESGEN_CMD "\"${Python3_EXECUTABLE}\" \"${CTYPESGEN_EXECUTABLE}\"")
+            endif()
+        else()
+            set(CTYPESGEN_CMD "${CTYPESGEN_EXECUTABLE}")
+        endif()
+        message(STATUS "Using source-built ctypesgen: ${CTYPESGEN_EXECUTABLE}")
+    else()
+        message(STATUS "Using system ctypesgen (if available)")
+    endif()
+    
+    # Create enhanced Python bindings target that uses our custom setup
+    if(WIN32 AND AUTO_SETUP_MINGW AND MINGW_FOUND AND AUTO_SETUP_CTYPESGEN AND CTYPESGEN_FOUND)
+        # Use both MinGW and ctypesgen from source
         add_custom_target(python_bindings
-            COMMAND "${CMAKE_BINARY_DIR}/setup_mingw_env.bat" && ctypesgen -o pydemolib.py -l $<TARGET_FILE:demolib> demolib.h
+            COMMAND "${CMAKE_BINARY_DIR}/setup_mingw_env.bat" && ${CTYPESGEN_CMD} -o pydemolib.py -l $<TARGET_FILE:demolib> "${CMAKE_CURRENT_SOURCE_DIR}/demolib.h"
+            DEPENDS demolib
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Generating Python bindings with source-built ctypesgen and MinGW"
+        )
+        
+        # Combined environment setup target
+        add_custom_target(setup_dev_env
+            COMMAND "${CMAKE_BINARY_DIR}/setup_mingw_env.bat" && "${CMAKE_BINARY_DIR}/setup_ctypesgen_env.bat"
+            COMMENT "Setting up complete development environment (MinGW + ctypesgen)"
+        )
+        
+        # Target to verify both tools are working together
+        add_custom_target(test_dev_env
+            COMMAND "${CMAKE_BINARY_DIR}/setup_mingw_env.bat" && "${CMAKE_BINARY_DIR}/setup_ctypesgen_env.bat" && ${CTYPESGEN_CMD} --version && gcc --version
+            COMMENT "Testing complete development environment"
+        )
+        
+    elseif(WIN32 AND AUTO_SETUP_MINGW AND MINGW_FOUND)
+        # Use MinGW with system/fallback ctypesgen
+        add_custom_target(python_bindings
+            COMMAND "${CMAKE_BINARY_DIR}/setup_mingw_env.bat" && ${CTYPESGEN_CMD} -o pydemolib.py -l $<TARGET_FILE:demolib> "${CMAKE_CURRENT_SOURCE_DIR}/demolib.h"
             DEPENDS demolib
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             COMMENT "Generating Python bindings with ctypesgen (using MinGW)"
         )
         
-        # Target to verify MinGW is working for ctypesgen
-        add_custom_target(test_ctypesgen_mingw
-            COMMAND "${CMAKE_BINARY_DIR}/setup_mingw_env.bat" && ${Python3_EXECUTABLE} -c "import subprocess; subprocess.run(['gcc', '--version'], check=True)"
-            COMMENT "Testing if ctypesgen can access GCC"
+    elseif(AUTO_SETUP_CTYPESGEN AND CTYPESGEN_FOUND)
+        # Use source-built ctypesgen without MinGW
+        add_custom_target(python_bindings
+            COMMAND ${CTYPESGEN_CMD} -o pydemolib.py -l $<TARGET_FILE:demolib> "${CMAKE_CURRENT_SOURCE_DIR}/demolib.h"
+            DEPENDS demolib
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Generating Python bindings with source-built ctypesgen"
         )
+        
     else()
         # Fallback to standard ctypesgen (might not work without GCC)
         add_custom_target(python_bindings
-            COMMAND ctypesgen -o pydemolib.py -l $<TARGET_FILE:demolib> demolib.h
+            COMMAND ${CTYPESGEN_CMD} -o pydemolib.py -l $<TARGET_FILE:demolib> "${CMAKE_CURRENT_SOURCE_DIR}/demolib.h"
             DEPENDS demolib
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             COMMENT "Generating Python bindings with ctypesgen"
@@ -159,10 +227,16 @@ if(Python3_FOUND)
         COMMENT "Running Python demo application"
     )
     
-    # Enhanced target that sets up everything
-    add_custom_target(demo_with_mingw
+    # Enhanced target that sets up everything from source
+    add_custom_target(demo_from_source
         DEPENDS python_bindings run_python_demo
-        COMMENT "Complete demo with MinGW setup and Python bindings"
+        COMMENT "Complete demo with source-built tools and Python bindings"
+    )
+    
+    # Legacy compatibility target
+    add_custom_target(demo_with_mingw
+        DEPENDS demo_from_source
+        COMMENT "Alias for demo_from_source (backward compatibility)"
     )
 endif()
 
