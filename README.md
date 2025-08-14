@@ -5,28 +5,37 @@ This little demonstration shows how bindings for a very simple C library
 and associated header can be quickly generated using Ctypesgen and accessed 
 by a Python program on Windows.
 
-## Quick Start (CMake)
+## Quick Start (CMake with Auto MinGW Setup)
 
-For the fastest setup, use the provided build script:
+For the fastest setup with automatic MinGW-w64 installation:
 
 ```cmd
-# Windows
+# Windows - Automatic MinGW setup and build
 build.bat
+
+# Or setup MinGW only
+setup_mingw.bat
 
 # Linux/macOS  
 chmod +x build.sh
 ./build.sh
 ```
 
-This will build the library, run tests, and show you how to generate Python bindings.
+The enhanced build script will automatically download and setup MinGW-w64 if needed!
 
 ## Prerequisites
 
-To run this demo on Windows, you need:
+### Basic Requirements
 - Python 3.x
+- CMake 3.22 or later
 - Microsoft Visual C++ compiler (comes with Visual Studio or Build Tools for Visual Studio)
-- **For automatic ctypesgen generation**: MinGW-w64 (provides gcc for preprocessing)
-- **For CMake builds**: CMake 3.22 or later
+
+### For Automatic MinGW Setup (Recommended)
+- **7-Zip** (for extracting MinGW archives) - [Download here](https://www.7-zip.org/)
+- **Internet connection** (for downloading MinGW-w64)
+
+### Manual MinGW Setup (Alternative)
+- **MinGW-w64** (provides gcc for preprocessing) - Manual installation required
 
 ## Installing ctypesgen
 
@@ -96,9 +105,48 @@ usage: cl [ option... ] filename... [ /link linkoption... ]
 
 ## Steps for Windows
 
-### Option A: Automatic Generation (Recommended)
+### Option A: Automatic MinGW Setup (Recommended)
 
-This approach uses ctypesgen to automatically generate bindings, just like on Linux.
+This approach automatically downloads and configures MinGW-w64, then uses ctypesgen to generate bindings.
+
+#### 1. Run the automatic setup
+
+```cmd
+# Build everything with automatic MinGW setup
+build.bat
+
+# Or setup MinGW only first
+setup_mingw.bat
+```
+
+The script will:
+- Download MinGW-w64 automatically if not found
+- Extract and configure it for ctypesgen use
+- Set up environment scripts
+- Test the installation
+
+#### 2. Verify MinGW setup
+
+After running the setup, test that GCC is available:
+
+```cmd
+# Use the generated environment script
+call build\setup_mingw_env.bat
+
+# Test GCC
+gcc --version
+```
+
+#### 3. Generate Python bindings and run demo
+
+```cmd
+cd build
+cmake --build . --target demo_with_mingw --config Release
+```
+
+### Option B: Manual MinGW Installation
+
+This approach uses manual MinGW installation, as in the original guide.
 
 #### 1. Install MinGW-w64 (one-time setup)
 

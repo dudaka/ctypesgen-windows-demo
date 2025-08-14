@@ -63,3 +63,12 @@ __pycache__/
 *.pyo
 *.pyd
 pydemolib.py
+
+# MinGW-w64 auto-download and build files
+mingw-w64/
+mingw-w64-*
+*.7z
+setup_mingw_env.bat
+setup_mingw_env.ps1
+download_mingw.ps1
+extract_mingw.ps1

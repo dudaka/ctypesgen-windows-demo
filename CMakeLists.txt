@@ -1,5 +1,33 @@
 cmake_minimum_required(VERSION 3.22)
+
+# Add our custom module path
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
+
 project(CtypesgenDemo VERSION 1.0.0 LANGUAGES C)
+
+# Options for MinGW setup
+option(AUTO_SETUP_MINGW "Automatically setup MinGW-w64 for ctypesgen" ON)
+option(USE_SYSTEM_MINGW "Use system MinGW if available" ON)
+
+# Setup MinGW-w64 if requested and on Windows
+if(WIN32 AND AUTO_SETUP_MINGW)
+    message(STATUS "Setting up MinGW-w64 for ctypesgen support...")
+    include(DownloadMingw)
+    
+    # Create a custom target to setup MinGW environment
+    add_custom_target(setup_mingw_env
+        COMMAND "${CMAKE_BINARY_DIR}/setup_mingw_env.bat"
+        COMMENT "Setting up MinGW environment"
+        VERBATIM
+    )
+    
+    # Create a custom target to test MinGW installation
+    add_custom_target(test_mingw
+        COMMAND "${CMAKE_BINARY_DIR}/setup_mingw_env.bat" && gcc --version
+        COMMENT "Testing MinGW installation"
+        VERBATIM
+    )
+endif()
 
 # Set C standard
 set(CMAKE_C_STANDARD 99)
@@ -98,13 +126,30 @@ endif()
 # Python integration target (optional)
 find_package(Python3 COMPONENTS Interpreter)
 if(Python3_FOUND)
-    # Custom target to generate Python bindings using ctypesgen
-    add_custom_target(python_bindings
-        COMMAND ${Python3_EXECUTABLE} -m ctypesgen -o pydemolib.py -l $<TARGET_FILE:demolib> demolib.h
-        DEPENDS demolib
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMENT "Generating Python bindings with ctypesgen"
-    )
+    # Create enhanced Python bindings target that uses our MinGW setup
+    if(WIN32 AND AUTO_SETUP_MINGW AND MINGW_FOUND)
+        # Use MinGW environment for ctypesgen
+        add_custom_target(python_bindings
+            COMMAND "${CMAKE_BINARY_DIR}/setup_mingw_env.bat" && ctypesgen -o pydemolib.py -l $<TARGET_FILE:demolib> demolib.h
+            DEPENDS demolib
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Generating Python bindings with ctypesgen (using MinGW)"
+        )
+        
+        # Target to verify MinGW is working for ctypesgen
+        add_custom_target(test_ctypesgen_mingw
+            COMMAND "${CMAKE_BINARY_DIR}/setup_mingw_env.bat" && ${Python3_EXECUTABLE} -c "import subprocess; subprocess.run(['gcc', '--version'], check=True)"
+            COMMENT "Testing if ctypesgen can access GCC"
+        )
+    else()
+        # Fallback to standard ctypesgen (might not work without GCC)
+        add_custom_target(python_bindings
+            COMMAND ctypesgen -o pydemolib.py -l $<TARGET_FILE:demolib> demolib.h
+            DEPENDS demolib
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Generating Python bindings with ctypesgen"
+        )
+    endif()
     
     # Custom target to run Python demo
     add_custom_target(run_python_demo
@@ -112,6 +157,12 @@ if(Python3_FOUND)
         DEPENDS python_bindings
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Running Python demo application"
+    )
+    
+    # Enhanced target that sets up everything
+    add_custom_target(demo_with_mingw
+        DEPENDS python_bindings run_python_demo
+        COMMENT "Complete demo with MinGW setup and Python bindings"
     )
 endif()
 
