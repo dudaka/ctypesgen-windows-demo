@@ -5,12 +5,28 @@ This little demonstration shows how bindings for a very simple C library
 and associated header can be quickly generated using Ctypesgen and accessed 
 by a Python program on Windows.
 
+## Quick Start (CMake)
+
+For the fastest setup, use the provided build script:
+
+```cmd
+# Windows
+build.bat
+
+# Linux/macOS  
+chmod +x build.sh
+./build.sh
+```
+
+This will build the library, run tests, and show you how to generate Python bindings.
+
 ## Prerequisites
 
 To run this demo on Windows, you need:
 - Python 3.x
 - Microsoft Visual C++ compiler (comes with Visual Studio or Build Tools for Visual Studio)
 - **For automatic ctypesgen generation**: MinGW-w64 (provides gcc for preprocessing)
+- **For CMake builds**: CMake 3.22 or later
 
 ## Installing ctypesgen
 
@@ -135,6 +151,76 @@ result 3
 DB_C_TYPE_STRING 1
 ```
 
+### Option A2: CMake Build (Modern Approach)
+
+This approach uses CMake for a more portable and modern build system.
+
+#### Prerequisites for CMake
+
+- CMake 3.22 or later ([Download CMake](https://cmake.org/download/))
+- Visual Studio Build Tools or Visual Studio (same as Option A)
+- Python 3.x with ctypesgen installed
+
+#### 1. Configure the build
+
+Open a Developer Command Prompt or PowerShell and navigate to the project directory:
+
+```cmd
+mkdir build
+cd build
+cmake ..
+```
+
+Or for a specific generator (e.g., Visual Studio):
+
+```cmd
+mkdir build
+cd build
+cmake -G "Visual Studio 17 2022" -A x64 ..
+```
+
+#### 2. Build the library
+
+```cmd
+cmake --build . --config Release
+```
+
+#### 3. Generate Python bindings (optional)
+
+```cmd
+cmake --build . --target python_bindings --config Release
+```
+
+#### 4. Run the test
+
+```cmd
+cmake --build . --target demo_test --config Release
+ctest -C Release
+```
+
+**Note**: For single-config generators (like Makefiles), use `ctest` without the `-C` flag:
+```cmd
+ctest
+```
+
+Or run the executable directly:
+
+```cmd
+Release\demo_test.exe
+```
+
+#### 5. Run Python demo (optional)
+
+```cmd
+cmake --build . --target run_python_demo --config Release
+```
+
+#### Install the library (optional)
+
+```cmd
+cmake --install . --prefix install
+```
+
 ### Option B: Manual Approach (Fallback)
 
 If you prefer not to install MinGW or encounter issues:
@@ -221,6 +307,18 @@ You can also try executing the same code from a C program:
 - **Key insight**: ctypesgen requires a C preprocessor to parse header files
 - **Solution**: Installing MinGW provides `gcc` which ctypesgen can use for preprocessing
 - **Alternative**: Manual ctypes bindings avoid preprocessing issues entirely
+- **CMake benefits**: Provides cross-platform build configuration, automatic dependency management, and integration with modern development tools
+
+## CMake Benefits
+
+Using CMake offers several advantages:
+
+- **Cross-platform**: Works on Windows, Linux, and macOS
+- **IDE integration**: Generates project files for Visual Studio, VS Code, etc.
+- **Dependency management**: Handles library linking automatically
+- **Testing integration**: Built-in support for CTest
+- **Installation support**: Easy packaging and distribution
+- **Python integration**: Custom targets for ctypesgen and running Python scripts
 
 ## Why ctypesgen Sometimes Fails on Windows
 
@@ -254,3 +352,20 @@ On Windows without MinGW:
 1. Try alternative installation: `choco install mingw` (if you have Chocolatey)
 2. Use manual approach as it doesn't require any external dependencies
 3. Consider using WSL (Windows Subsystem for Linux) for a Linux-like environment
+
+### If CTest fails with "Unknown argument: --config":
+
+The correct flag is `-C` (uppercase), not `--config`:
+
+```cmd
+# Correct (multi-config generators like Visual Studio)
+ctest -C Release
+
+# Incorrect
+ctest --config Release
+```
+
+For single-config generators (like Makefiles), omit the configuration:
+```cmd
+ctest
+```
