@@ -56,6 +56,7 @@ Makefile
 *.cmake
 !CMakeLists.txt
 !cmake/*.cmake.in
+!cmake/modules/*.cmake
 
 # Python cache and generated files
 __pycache__/
@@ -64,11 +65,8 @@ __pycache__/
 *.pyd
 pydemolib.py
 
-# MinGW-w64 auto-download and build files
+# MinGW-w64 auto-clone and build files
 mingw-w64/
-mingw-w64-*
-*.7z
+mingw-w64-source/
 setup_mingw_env.bat
 setup_mingw_env.ps1
-download_mingw.ps1
-extract_mingw.ps1

@@ -31,8 +31,8 @@ The enhanced build script will automatically download and setup MinGW-w64 if nee
 - Microsoft Visual C++ compiler (comes with Visual Studio or Build Tools for Visual Studio)
 
 ### For Automatic MinGW Setup (Recommended)
-- **7-Zip** (for extracting MinGW archives) - [Download here](https://www.7-zip.org/)
-- **Internet connection** (for downloading MinGW-w64)
+- **Git** (for cloning MinGW-w64 source) - [Download here](https://git-scm.com/download/win)
+- **Internet connection** (for cloning MinGW-w64 repository)
 
 ### Manual MinGW Setup (Alternative)
 - **MinGW-w64** (provides gcc for preprocessing) - Manual installation required
@@ -120,9 +120,9 @@ setup_mingw.bat
 ```
 
 The script will:
-- Download MinGW-w64 automatically if not found
-- Extract and configure it for ctypesgen use
-- Set up environment scripts
+- Clone MinGW-w64 source from Git repository if not found
+- Create a GCC wrapper using the system cl.exe compiler
+- Set up environment scripts for ctypesgen compatibility
 - Test the installation
 
 #### 2. Verify MinGW setup

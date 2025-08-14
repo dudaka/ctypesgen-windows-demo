@@ -11,12 +11,12 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM Check if 7zip is available (needed for MinGW extraction)
-7z.exe >nul 2>&1
+REM Check if Git is available (needed for MinGW cloning)
+git --version >nul 2>&1
 if errorlevel 1 (
-    echo WARNING: 7zip not found. 
-    echo If MinGW download is needed, please install 7zip first.
-    echo Download from: https://www.7-zip.org/
+    echo WARNING: Git not found. 
+    echo If MinGW download is needed, please install Git first.
+    echo Download from: https://git-scm.com/download/win
     echo Continuing anyway...
 )
 
